@@ -1,0 +1,70 @@
+
+version: '3.9'
+networks:
+  gitlab-network:
+    name: gitlab-network # use custom network name instead of the default one
+volumes:
+  gitlab-runner-home:
+      name: HOME-gitlab-runner-home   # /home/gitlab-runner
+  gitlab-runner-config:
+      name: HOME-gitlab-runner-config # /etc/gitlab-runner
+  gitlab-config:
+      name: HOME-gitlab-config        # /etc/gitlab
+  gitlab-data:
+      name: HOME-gitlab-data          # /var/opt/gitlab
+  gitlab-logs:
+      name: HOME-gitlab-logs          # /var/log/gitlab
+services:
+  # Gitlab server including nginx and git
+  gitlab:
+    image: 'gitlab/gitlab-ce:16.2.1-ce.0'
+    container_name: gitlab-artemis
+    restart: always
+    hostname: 'gitlab-internal' # container-internal name
+    environment: # https://docs.gitlab.com/ee/administration/environment_variables.html
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'https://localhost' # URL from which nginx will respond (the 'https' enables ssl)
+        nginx['enable'] = true
+        nginx['listen_addresses'] = ["0.0.0.0", "[::]"]  # listen on all IPv4 and IPv6 addresses
+        nginx['redirect_http_to_https'] = true
+        nginx['redirect_http_to_https_port'] = 80
+        nginx['ssl_certificate'] = "/etc/gitlab/ssl/artemis.hs-merseburg.de+8.pem" # SSL certificate provided by nginx (note: self-generated certificates need a local root certificate in the client browser)
+        nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/artemis.hs-merseburg.de+8-key.pem" # SSL certificate used for encryption (note: self-generated certificates need a local root certificate in the client browser)
+        gitlab_rails['monitoring_whitelist'] = ['0.0.0.0/0'] # health-monitoring whitelist
+      GITLAB_ROOT_PASSWORD: 'bratwurst'
+      # GITLAB_SHARED_RUNNERS_REGISTRATION_TOKEN: 'foobar42' # registration tokes are deprecated
+      # external url: https://docs.gitlab.com/omnibus/settings/configuration.html#specifying-the-external-url-at-the-time-of-installation
+    networks:
+      - gitlab-network # available in the default network
+    ports:
+      - "127.0.0.1:80:80"
+      - "127.0.0.1:443:443"
+      - "127.0.0.1:22:22"
+    volumes:
+      - gitlab-config:/etc/gitlab
+      - ./gitlab/certs:/etc/gitlab/ssl # map the SSL certificates to the docker container (if self-signed certificates are provided, a corresponding CA root needs to be made available to the client's browser)
+      - gitlab-logs:/var/log/gitlab
+      - gitlab-data:/var/opt/gitlab
+    shm_size: '256m'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+  # A shared runner for Gitlab CI (basic runner docs: https://docs.gitlab.com/runner/install/docker.html)
+  gitlab-runner:
+    image: gitlab/gitlab-runner:alpine3.18
+    container_name: gitlab-artemis-runner
+    restart: always
+    hostname: 'gitlab-runner-internal'
+    environment: 
+      CA_CERTIFICATES_PATH: '/etc/gitlab-runner/certs/rootCA.pem' # default is '/etc/gitlab-runner/certs/ca.crt'
+    networks:
+      - gitlab-network # available in the default network
+    volumes:
+      - gitlab-runner-config:/etc/gitlab-runner
+      - gitlab-runner-home:/home/gitlab-runner
+      - ./gitlab-runner/certs:/etc/gitlab-runner/certs # in case we run gitlab with self-signed certificates, the runner needs a trusted CA root (see also CA_CERTIFICATES_PATH)
+      - ./gitlab-runner/config.toml:/etc/gitlab-runner/config.toml # mapping runner configuration (could also be generated from registration script)
+      - /var/run/docker.sock:/var/run/docker.sock # not so clear why this is needed (as the documentation states)
+
