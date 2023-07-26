@@ -1,0 +1,33 @@
+version: '3.9'
+networks:
+  mysql-network:
+    name: mysql-network # use custom network name instead of the default one
+volumes:
+  mysql-data:
+      name: HOME-mysql-data   # /var/lib/mysql
+services:
+    mysql:
+        image: mysql:8.0.34
+        cap_add:
+            - SYS_NICE # "mbind: Operation not permitted", see https://github.com/docker-library/mysql/issues/303
+        container_name: 'mysql-artemis'
+        restart: always
+        hostname: 'mysql-internal'
+        environment:
+            MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+            MYSQL_ROOT_PASSWORD: ""
+            MYSQL_DATABASE: "Artemis"
+        networks:
+            - mysql-network # available in the network config
+        ports:
+            - "127.0.0.1:3306:3306"
+        volumes:
+            - mysql-data:/var/lib/mysql
+            - ./mysql/my.cnf:/etc/mysql/my.cnf 
+        #command: mysqld
+        healthcheck:
+            test: mysqladmin ping -h 127.0.0.1 -u root --silent
+            interval: 5s
+            timeout: 3s
+            retries: 30
+            start_period: 300s
