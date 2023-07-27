@@ -3,6 +3,8 @@ version: '3.9'
 networks:
   gitlab-network:
     name: gitlab-network # use custom network name instead of the default one
+  artemis: 
+    external: true 
 volumes:
   gitlab-runner-home:
       name: HOME-gitlab-runner-home   # /home/gitlab-runner
@@ -36,6 +38,7 @@ services:
       # external url: https://docs.gitlab.com/omnibus/settings/configuration.html#specifying-the-external-url-at-the-time-of-installation
     networks:
       - gitlab-network # available in the default network
+      - artemis # put in the Artemis' network so that it is reachable from there
     ports:
       - "127.0.0.1:80:80"
       - "127.0.0.1:443:443"

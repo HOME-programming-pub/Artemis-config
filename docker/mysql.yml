@@ -2,6 +2,8 @@ version: '3.9'
 networks:
   mysql-network:
     name: mysql-network # use custom network name instead of the default one
+  artemis: 
+    external: true
 volumes:
   mysql-data:
       name: HOME-mysql-data   # /var/lib/mysql
@@ -19,12 +21,12 @@ services:
             MYSQL_DATABASE: "Artemis"
         networks:
             - mysql-network # available in the network config
+            - artemis # artemis-network
         ports:
             - "127.0.0.1:3306:3306"
         volumes:
             - mysql-data:/var/lib/mysql
             - ./mysql/my.cnf:/etc/mysql/my.cnf 
-        #command: mysqld
         healthcheck:
             test: mysqladmin ping -h 127.0.0.1 -u root --silent
             interval: 5s
