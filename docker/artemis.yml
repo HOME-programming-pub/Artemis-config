@@ -21,6 +21,7 @@ services:
         platform: linux/amd64
         image: ghcr.io/ls1intum/artemis:latest
         restart: always
+        hostname: 'artemis' # container-internal name
         build:
             context: ..
             dockerfile: docker/artemis/Dockerfile
@@ -30,6 +31,8 @@ services:
             - artemis-data:/opt/artemis/data
             - artemis-content:/opt/artemis/public/content
             - artemis-config:/opt/artemis/config
+            - ./artemis/certs:/opt/artemis/certs
+            - ./artemis/java-certs/cacerts:/opt/java/openjdk/lib/security/cacerts
         # system environments are the default way for custom configuration overrides in the containerized artemis setups
         # either add them in the environments or env_file section (alternative to application-local.yml)
         env_file:
@@ -45,8 +48,10 @@ services:
         # expose the port to make it reachable docker internally even if the external port mapping changes
         expose:
             - "8080"
+            - "8089"
         ports:
             - "127.0.0.1:8080:8080"
+            - "127.0.0.1:8089:8089"
         networks:
             - artemis
 
