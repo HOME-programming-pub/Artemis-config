@@ -34,7 +34,9 @@ openssl pkcs12 -export -in artemis.hs-merseburg.de+8.pem -inkey artemis.hs-merse
 The generated file (all_converted.pfx) can be used by Spring as a keystore file. 
 
 Additionally, Artemis communicates via Java's SSL API with Gitlab. This requires to add the generated rootCA to the running JVM instance. This can be done by updating an existing Java CA-store: 
-```sudo keytool -importcert -alias mycert-local -file rootCA.pem -keystore %JAVA_HOME%/lib/security/cacerts``` 
+```
+sudo keytool -importcert -alias mycert-local -file rootCA.pem -keystore %JAVA_HOME%/lib/security/cacerts
+``` 
 The updated cacerts-file must then be mounted in the JVM in the Artemis Docker container.
 
 
