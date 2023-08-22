@@ -28,16 +28,17 @@ While this repo already contains a set of locally-trusted certificate, you may w
 * [docker/gitlab/certs/artemis.hs-merseburg.de+8.pem](docker/gitlab/certs/artemis.hs-merseburg.de+8.pem) (the certificate used by the browser) and
 * [docker/gitlab-runner/certs/rootCA.pem](docker/gitlab-runner/certs/rootCA.pem) (the CA root certificate).
 
-To enable a trusted experience without complaints and error messages, the root certificate needs to be placed into the CA store of the browser's or the host's CA store, the GitLab-Runner(s) and Artemis. The private key and the certificate are needed by GitLab (and nginx respectively) and Artemis. For the browser, GitLab and GitLab runner, the generated pem-files can be used as is. They just need to be mapped to the Docker-volumes and locations expected by the software.  [TODO: MySQL] 
+To enable a trusted experience without complaints and error messages, the root certificate needs to be placed into the CA store of the browser's or the host's CA store, the GitLab-Runner(s) and Artemis. The private key and the certificate are needed by GitLab (and nginx respectively) and Artemis. For the client browser, GitLab and GitLab runner, the generated pem-files can be used as they are. They just need to be mapped to the Docker-volumes and locations expected by the software. The browser installation is vendor-specific. [This link](https://support.mozilla.org/de/kb/zertifizierungsstellen-firefox-einrichten) describes how it works in Firefox. [TODO: MySQL] 
 
-For Artemis, this involves some more complicated steps. As Artemis is based on Java and Spring, the SSL-certifcates need some additional massage. Spring requires a Java keystore which stores the certificates in PKCS12 format or a Java key store. A combined PKS-Keypair for Java's keystore kann be generated from the given certificates using the following command: 
+For Artemis, some more complicated steps are involved. As Artemis is based on Java and Spring, the SSL-certifcates need some additional massage. [Spring requires an SSL bundle](https://spring.io/blog/2023/06/07/securing-spring-boot-applications-with-ssl) which stores the certificates in PKCS12 format or as a [Java keystore](https://en.wikipedia.org/wiki/Java_KeyStore). A combined PKS-Keypair for Java's keystore kann be generated with [OpenSSL](https://www.openssl.org/) from given certificates using the following command: 
 ```
 openssl pkcs12 -export -in artemis.hs-merseburg.de+8.pem -inkey artemis.hs-merseburg.de+8-key.pem -out all_converted.pfx -certfile rootCA.pem
 ```
-The generated file (all_converted.pfx) can be used by Spring as a keystore file. 
+The generated file (``all_converted.pfx``) can be used by Spring as a keystore file (ssl bundle). 
 
-Additionally, Artemis communicates via Java's SSL API with Gitlab. This requires to add the generated rootCA to the running JVM instance. This can be done by updating an existing Java CA-store: 
+Additionally, Artemis communicates via Java's SSL API with Gitlab. This requires to add the generated ``rootCA.pem`` to the JVM instance that runs in the Artemis Docker container. This can be done by updating an existing Java CA keystore (e.g., on the host machine): 
 ```
 sudo keytool -importcert -alias mycert-local -file rootCA.pem -keystore %JAVA_HOME%/lib/security/cacerts
 ``` 
-The updated cacerts-file must then be mounted in the JVM in the Artemis Docker container.
+Alternatively, keystores kann be edited using a graphical tool like [keystore explorer](http://keystore-explorer.org/index.html).
+The updated cacerts-file must then be mounted in the JVM in the Artemis Docker container (localtion ``%JAVA_HOME%/lib/security/cacerts``).
