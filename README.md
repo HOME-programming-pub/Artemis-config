@@ -2,10 +2,14 @@
 Setup of the Artemis-Plattform based on Gitlab and Docker.
 
 Command for starting the application using Docker-Compose (order of yml-files matters):
-```docker compose -f gitlab.yml -f mysql.yml -f artemis.yml up -d```
+```
+docker compose -f gitlab.yml -f mysql.yml -f artemis.yml up -d
+```
 
 Command for stopping the application:
-```docker compose -f gitlab.yml -f mysql.yml -f artemis.yml down```
+```
+docker compose -f gitlab.yml -f mysql.yml -f artemis.yml down
+```
 
 ## Local Test Setup
 
