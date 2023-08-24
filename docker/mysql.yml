@@ -26,7 +26,10 @@ services:
             - "127.0.0.1:3306:3306"
         volumes:
             - mysql-data:/var/lib/mysql
-            - ./mysql/my.cnf:/etc/mysql/my.cnf 
+            - ./mysql/my.cnf:/etc/mysql/my.cnf
+            - ./gitlab-runner/certs/rootCA.pem:/var/lib/mysql/rootCA.pem
+            - ./gitlab/certs/artemis.hs-merseburg.de+8.pem:/var/lib/mysql/artemis.hs-merseburg.de+8.pem
+            - ./gitlab/certs/artemis.hs-merseburg.de+8-key.pem:/var/lib/mysql/artemis.hs-merseburg.de+8-key.pem
         healthcheck:
             test: mysqladmin ping -h 127.0.0.1 -u root --silent
             interval: 5s
