@@ -1,5 +1,5 @@
 # Artemis-config
-Setup of the Artemis-Plattform based on Gitlab and Docker.
+Externalized setup of the [Artemis teaching plattform](https://artemis-platform.readthedocs.io/en/latest/) based on Gitlab and Docker.
 
 Command for starting the application using Docker-Compose (order of yml-files matters):
 ```
