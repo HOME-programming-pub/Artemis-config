@@ -15,9 +15,9 @@ docker compose -f gitlab.yml -f mysql.yml -f artemis.yml down
 
 ### GitLab
 
-If started for the first time, a Gitlab instance runner needs to be created in the Gitlab UI. The UI spills out a registration token, which must be inserted into the runner's ``config.toml`` configuration file, as a value of the ``token`` property.
+If started for the first time, a Gitlab instance runner needs to be created in the Gitlab UI (see [GitLab Documentation](https://docs.gitlab.com/ee/ci/runners/runners_scope.html#shared-runners) for more details). If the GitLab container is up and fully started, log in with the root account and go to the [runner configuration site](https://localhost/admin/runners/new). The UI spills out a registration token, which must be inserted into the runner's Docker container ``config.toml`` configuration file, as a value of the ``token`` property. This allows the actual runner process to authenticate with the Gitlab server. 
 
-Furthermore, a Gitlab personal access token for all scopes is required and needs to be placed into the local Artemis configuration file ``prod-application-local.env`` as a value of the ``ARTEMIS_VERSIONCONTROL_TOKEN`` variable. Additionally, it might be set for the ``ARTEMIS_VERSIONCONTROL_HEALTHAPITOKEN`` variable. However, in this case, a token with readonly scopes should be sufficient (would need to be generated separately).
+Furthermore, a Gitlab personal access token for all scopes is required and needs to be placed into the local Artemis configuration file ``prod-application-local.env`` as a value of the ``ARTEMIS_VERSIONCONTROL_TOKEN`` variable. Additionally, it might be set for the ``ARTEMIS_VERSIONCONTROL_HEALTHAPITOKEN`` variable. However, in this case, a token with readonly scopes should be sufficient (would need to be generated separately). The personal access token must be created using an account with sufficient permissions (e.g., root) in the [user's preferences](https://localhost/-/profile/personal_access_tokens).
 
 ### User-generated Certificates (SSL)
 
