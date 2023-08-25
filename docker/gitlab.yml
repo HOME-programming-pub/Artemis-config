@@ -50,14 +50,18 @@ services:
       - gitlab-data:/var/opt/gitlab
     shm_size: '256m'
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://127.0.0.1"]
+      test: ["CMD", "curl", "-f", "-k", "https://127.0.0.1"]
       interval: 30s
-      timeout: 10s
+      start_period: 400s
+      timeout: 30s
       retries: 5
   # A shared runner for Gitlab CI (basic runner docs: https://docs.gitlab.com/runner/install/docker.html)
   gitlab-runner:
     image: gitlab/gitlab-runner:alpine3.18
     container_name: gitlab-artemis-runner
+    depends_on:
+        gitlab:
+          condition: service_healthy
     restart: always
     hostname: 'gitlab-runner-internal'
     environment: 

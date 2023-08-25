@@ -18,6 +18,13 @@ volumes:
 services:
     artemis-app:
         container_name: artemis-app
+        depends_on:
+            gitlab:
+                condition: service_healthy
+            gitlab-runner:
+                condition: service_started
+            mysql:
+                condition: service_healthy
         platform: linux/amd64
         image: ghcr.io/ls1intum/artemis:latest
         restart: always
@@ -42,7 +49,7 @@ services:
         # as stated in the docker compose docs (at least not when this was committed)
         # https://docs.docker.com/compose/compose-file/#finding-referenced-service
         healthcheck:
-            test: wget -nv -t1 --spider http://localhost:8080/actuator/health || exit 1
+            test: wget -nv -t1 --no-verbose --spider --no-check-certificate https://localhost:8089/actuator/health || exit 1
             start_period: 600s
             interval: 1s
         # expose the port to make it reachable docker internally even if the external port mapping changes
@@ -54,4 +61,3 @@ services:
             - "127.0.0.1:8089:8089"
         networks:
             - artemis
-
