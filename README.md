@@ -60,6 +60,7 @@ Note that the MySQL container may fail when you run it for the first time, issue
 ### Setup Procedure: Summary
 The following list summarizes the involved setup steps to get Artemis up an running with GitLab.
 
+1. Clone this repo to your machine including the Artemis submodule
 1. Generate (local setup)/ obtain (production setup) SSL Certifcates
 1. Convert and configure SSL Certificates (PEM files, PFX files, Java keystore)
 1. Start GitLab and copy the personal access token of root user, and create an instance runner and copy the runner token
@@ -69,4 +70,6 @@ The following list summarizes the involved setup steps to get Artemis up an runn
 1. Restart MySQL with the PEM files; check if it remains online
 1. Stop and remove all running containters
 1. Start all containers with ``docker compose -f gitlab.yml -f mysql.yml -f artemis.yml up -d``
-1. Check if the artemis_admin user exists in Artemis and GitLab
+1. Check if the artemis_admin user exists in Artemis and GitLab (note: "Password must not contain commonly used combinations of [English] words and letters")
+
+Don't forget to change user and passwords. The defaults are good for testing only.
