@@ -55,3 +55,16 @@ ssl_ca = rootCA.pem
 ssl_cert = artemis.hs-merseburg.de+8.pem
 ssl_key = artemis.hs-merseburg.de+8-key.pem
 ```
+Note that the MySQL container may fail when you run it for the first time, issueing the message ``--initialize specified but the data directory has files in it. Aborting.`. This indicates that it found files in the data directory, which is expected to be empty on the first run. In that case, it must be ensured that no certificates are mapped to the data directory when it is initialized. Just comment out the certifcate mappings in the compose file for the first run.
+
+### Setup Procedure: Summary
+1. Generate (local setup)/ obtain (production setup) SSL Certifcates
+1. Convert and configure SSL Certificates (PEM files, PFX files, Java keystore)
+1. Start GitLab and copy the personal access token of root user, and create an instance runner and copy the runner token
+1. Add the GitLab tokens to the configuration files
+1. Restart GitLab and also start GitLab runner; check if the runner registers with GitLab and listens for jobs
+1. Start MySQL for the first time, without the PEM files (initialization)
+1. Restart MySQL with the PEM files; check if it remains online
+1. Stop and remove all running containters
+1. Start all containers with ``docker compose -f gitlab.yml -f mysql.yml -f artemis.yml up -d''
+1. Check if the artemis_admin user exists in Artemis and GitLab
